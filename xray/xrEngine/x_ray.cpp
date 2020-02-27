@@ -1441,3 +1441,13 @@ u32 calc_progress_color(u32 idx, u32 total, int stage, int max_stage)
 	return color_argb_f		(f,1.0f,1.0f,1.0f);
 }
 */
+
+// Always request high performance GPU
+extern "C"
+{
+    // https://docs.nvidia.com/gameworks/content/technologies/desktop/optimus.htm
+    ENGINE_API DWORD NvOptimusEnablement = 0x00000001; // NVIDIA Optimus
+
+    // https://gpuopen.com/amdpowerxpressrequesthighperformance/
+    ENGINE_API DWORD AmdPowerXpressRequestHighPerformance = 0x00000001; // PowerXpress or Hybrid Graphics
+}
