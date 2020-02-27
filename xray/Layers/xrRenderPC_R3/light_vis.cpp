@@ -87,6 +87,6 @@ void	light::vis_update			()
 	} 
 	else 
 	{
-		vis.frame2test	=	frame	+ 1; 
+		vis.frame2test	=	frame	+ 5; 
 	}
 }
