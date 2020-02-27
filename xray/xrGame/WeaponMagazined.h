@@ -28,6 +28,8 @@ protected:
 	ESoundTypes		m_eSoundShot;
 	ESoundTypes		m_eSoundEmptyClick;
 	ESoundTypes		m_eSoundReload;
+    ESoundTypes		m_eSoundReloadEmpty;
+    ESoundTypes		m_eSoundReloadMisfire;
 	// General
 	//кадр момента пересчета UpdateSounds
 	u32				dwUpdateSounds_Frame;
@@ -156,4 +158,6 @@ protected:
 	virtual	int		ShotsFired			() { return m_iShotNum; }
 	virtual float	GetWeaponDeterioration	();
 
+    //AVO: for custom added sounds check if sound exists
+    bool WeaponSoundExist(pcstr section, pcstr sound_name);
 };

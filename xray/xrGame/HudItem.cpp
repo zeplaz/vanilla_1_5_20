@@ -367,19 +367,51 @@ bool CHudItem::TryPlayAnimIdle()
 		{
 			CEntity::SEntityState st;
 			pActor->g_State(st);
-			if(st.bSprint)
-			{
-				PlayAnimIdleSprint();
-				return true;
-			}else
-			if(!st.bCrouch && pActor->AnyMove())
-			{
-				PlayAnimIdleMoving();
-				return true;
+            if (st.bSprint)
+            {
+                PlayAnimIdleSprint();
+                return true;
+            }
+            if (pActor->AnyMove())
+            {
+                if (!st.bCrouch)
+                {
+                    PlayAnimIdleMoving();
+                    return true;
+                }
+                if (st.bCrouch && isHUDAnimationExist("anm_idle_moving_crouch"))
+                {
+                    PlayAnimIdleMovingCrouch();
+                    return true;
+                }
 			}
 		}
 	}
 	return false;
+}
+
+bool CHudItem::isHUDAnimationExist(pcstr anim_name)
+{
+    if (HudItemData()) // First person
+    {
+        string256 anim_name_r;
+        bool is_16x9 = UI()->is_16_9_mode();
+        u16 attach_place_idx = pSettings->r_u16(HudItemData()->m_sect_name, "attach_place_idx");
+        sprintf_s(anim_name_r, "%s%s", anim_name, (attach_place_idx == 1 && is_16x9) ? "_16x9" : "");
+        player_hud_motion* anm = HudItemData()->m_hand_motions.find_motion(anim_name_r);
+        if (anm)
+            return true;
+    }
+    else // Third person
+        if (g_player_hud->motion_length(anim_name, HudSection(), m_current_motion_def) > 100)
+            return true;
+    Msg("~ [WARNING] ------ Animation [%s] does not exist in [%s]", anim_name, HudSection().c_str());
+    return false;
+}
+
+void CHudItem::PlayAnimIdleMovingCrouch()
+{
+	PlayHUDMotion("anm_idle_moving_crouch", true, nullptr, GetState()); 
 }
 
 void CHudItem::PlayAnimIdleMoving()

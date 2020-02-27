@@ -609,12 +609,33 @@ void CWeaponMagazinedWGrenade::PlayAnimHide()
 
 void CWeaponMagazinedWGrenade::PlayAnimReload()
 {
-	VERIFY(GetState()==eReload);
+    auto state = GetState();
+    VERIFY(state == eReload);
 
 	if(IsGrenadeLauncherAttached())
-		PlayHUDMotion("anm_reload_w_gl", TRUE, this, GetState());
-	else
-		inherited::PlayAnimReload();
+    {
+        if (bMisfire)
+        {
+            if (isHUDAnimationExist("anm_reload_misfire_w_gl"))
+                PlayHUDMotion("anm_reload_misfire_w_gl", true, this, state);
+            else
+                PlayHUDMotion("anm_reload_w_gl", true, this, state);
+        }
+        else
+        {
+            if (iAmmoElapsed == 0)
+            {
+                if (isHUDAnimationExist("anm_reload_empty_w_gl"))
+                    PlayHUDMotion("anm_reload_empty_w_gl", true, this, state);
+                else
+                    PlayHUDMotion("anm_reload_w_gl", true, this, state);
+            }
+            else
+                PlayHUDMotion("anm_reload_w_gl", true, this, state);
+        }
+    }
+    else
+        inherited::PlayAnimReload();
 }
 
 void CWeaponMagazinedWGrenade::PlayAnimIdle()
@@ -642,7 +663,10 @@ void CWeaponMagazinedWGrenade::PlayAnimIdle()
 				}else
 				if(pActor->AnyMove())
 				{
-					act_state = 2;
+                    if (!st.bCrouch)
+                        act_state = 2;
+                    if (st.bCrouch)
+                        act_state = 3;
 					PlayHUDMotion("anm_idle_moving", TRUE, NULL, GetState());
 				}
 			}
@@ -657,7 +681,9 @@ void CWeaponMagazinedWGrenade::PlayAnimIdle()
 				else
 				if(act_state==2)
 					PlayHUDMotion("anm_idle_moving_g", TRUE, NULL,GetState());
-
+                else if (act_state == 3)
+                    if (isHUDAnimationExist("anm_idle_moving_crouch_g"))
+                        PlayHUDMotion("anm_idle_moving_crouch_g", true, nullptr, GetState());
 			}else
 			{
 				if(act_state==0)
@@ -668,6 +694,9 @@ void CWeaponMagazinedWGrenade::PlayAnimIdle()
 				else
 				if(act_state==2)
 					PlayHUDMotion("anm_idle_moving_w_gl", TRUE, NULL,GetState());
+                else if (act_state == 3)
+                    if (isHUDAnimationExist("anm_idle_moving_crouch_w_gl"))
+                        PlayHUDMotion("anm_idle_moving_crouch_w_gl", true, nullptr, GetState());				
 			}
 		
 		}

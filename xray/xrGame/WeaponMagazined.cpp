@@ -18,6 +18,7 @@
 #include "MPPlayersBag.h"
 #include "ui/UIXmlInit.h"
 #include "ui/UIWindow.h"
+#include "HudSound.h"
 
 ENGINE_API	bool	g_dedicated_server;
 
@@ -39,6 +40,8 @@ CWeaponMagazined::CWeaponMagazined(ESoundTypes eSoundType) : CWeapon()
 	m_eSoundShot				= ESoundTypes(SOUND_TYPE_WEAPON_SHOOTING | eSoundType);
 	m_eSoundEmptyClick			= ESoundTypes(SOUND_TYPE_WEAPON_EMPTY_CLICKING | eSoundType);
 	m_eSoundReload				= ESoundTypes(SOUND_TYPE_WEAPON_RECHARGING | eSoundType);
+    m_eSoundReloadEmpty 		= ESoundTypes(SOUND_TYPE_WEAPON_RECHARGING | eSoundType);	
+    m_eSoundReloadMisfire		= ESoundTypes(SOUND_TYPE_WEAPON_RECHARGING | eSoundType);	
 	
 	m_sSndShotCurrent			= NULL;
 	m_sSilencerFlameParticles	= m_sSilencerSmokeParticles = NULL;
@@ -60,6 +63,16 @@ void CWeaponMagazined::net_Destroy()
 	inherited::net_Destroy();
 }
 
+//AVO: for custom added sounds check if sound exists
+bool CWeaponMagazined::WeaponSoundExist(LPCSTR section, LPCSTR sound_name)
+{
+    pcstr str;
+    bool sec_exist = process_if_exists_set(section, sound_name, &CInifile::r_string, str, true);
+    if (sec_exist)
+        return true;
+    Msg("~ [WARNING] ------ Sound [%s] does not exist in [%s]", sound_name, section);
+    return false;
+}
 
 void CWeaponMagazined::Load	(LPCSTR section)
 {
@@ -71,6 +84,11 @@ void CWeaponMagazined::Load	(LPCSTR section)
 	m_sounds.LoadSound(section,"snd_shoot", "sndShot"		, m_eSoundShot		);
 	m_sounds.LoadSound(section,"snd_empty", "sndEmptyClick"	, m_eSoundEmptyClick	);
 	m_sounds.LoadSound(section,"snd_reload", "sndReload"		, m_eSoundReload		);
+	if (WeaponSoundExist(section, "snd_reload_empty"))
+        m_sounds.LoadSound(section, "snd_reload_empty", "sndReloadEmpty", m_eSoundReloadEmpty);
+
+	if (WeaponSoundExist(section, "snd_reload_misfire"))
+        m_sounds.LoadSound(section, "snd_reload_misfire", "sndReloadMisfire", m_eSoundReloadMisfire);
 	
 	m_sSndShotCurrent = "sndShot";
 		
@@ -450,6 +468,11 @@ void CWeaponMagazined::UpdateSounds	()
 	m_sounds.SetPosition("sndHide", P);
 //. nah	m_sounds.SetPosition("sndShot", P);
 	m_sounds.SetPosition("sndReload", P);
+    if (m_sounds.FindSoundItem("sndReloadEmpty", false))
+        m_sounds.SetPosition("sndReloadEmpty", P);
+
+	if (m_sounds.FindSoundItem("sndReloadMisfire", false))
+        m_sounds.SetPosition("sndReloadMisfire", P);
 //. nah	m_sounds.SetPosition("sndEmptyClick", P);
 }
 
@@ -679,7 +702,24 @@ void CWeaponMagazined::switch2_Empty()
 }
 void CWeaponMagazined::PlayReloadSound()
 {
-	PlaySound	("sndReload",get_LastFP());
+        if (bMisfire)
+        {
+            //TODO: make sure correct sound is loaded in CWeaponMagazined::Load(LPCSTR section)
+            if (m_sounds.FindSoundItem("sndReloadMisfire", false))
+                PlaySound("sndReloadMisfire", get_LastFP());
+            else
+                PlaySound("sndReload", get_LastFP());
+        }
+        else
+        {
+            if (iAmmoElapsed == 0)
+                if (m_sounds.FindSoundItem("sndReloadEmpty", false))
+                    PlaySound("sndReloadEmpty", get_LastFP());
+                else
+                    PlaySound("sndReload", get_LastFP());
+            else
+                PlaySound("sndReload", get_LastFP());
+        }
 }
 
 void CWeaponMagazined::switch2_Reload()
@@ -1007,8 +1047,23 @@ void CWeaponMagazined::PlayAnimHide()
 
 void CWeaponMagazined::PlayAnimReload()
 {
-	VERIFY(GetState()==eReload);
-	PlayHUDMotion("anm_reload", TRUE, this, GetState());
+    auto state = GetState();
+    VERIFY(state == eReload);
+    if (bMisfire)
+        if (isHUDAnimationExist("anm_reload_misfire"))
+            PlayHUDMotion("anm_reload_misfire", true, this, state);
+        else
+            PlayHUDMotion("anm_reload", true, this, state);
+    else
+    {
+        if (iAmmoElapsed == 0)
+            if (isHUDAnimationExist("anm_reload_empty"))
+                PlayHUDMotion("anm_reload_empty", true, this, state);
+            else
+                PlayHUDMotion("anm_reload", true, this, state);
+        else
+            PlayHUDMotion("anm_reload", true, this, state);
+    }
 }
 
 void CWeaponMagazined::PlayAnimAim()
@@ -1242,6 +1297,14 @@ bool CWeaponMagazined::install_upgrade_impl( LPCSTR section, bool test )
 	result2 = process_if_exists_set( section, "snd_reload", &CInifile::r_string, str, test );
 	if ( result2 && !test ) { m_sounds.LoadSound( section, "snd_reload"	, "sndReload"		, m_eSoundReload	);	}
 	result |= result2;
+    result2 = process_if_exists_set(section, "snd_reload_empty", &CInifile::r_string, str, test);
+    if (result2 && !test) { m_sounds.LoadSound(section, "snd_reload_empty", "sndReloadEmpty", m_eSoundReloadEmpty);	}
+    result |= result2;
+
+    result2 = process_if_exists_set(section, "snd_reload_misfire", &CInifile::r_string, str, test);
+    if (result2 && !test) { m_sounds.LoadSound(section, "snd_reload_misfire", "sndReloadMisfire", m_eSoundReloadMisfire);	}
+    result |= result2;
+
 
 	//snd_shoot1     = weapons\ak74u_shot_1 ??
 	//snd_shoot2     = weapons\ak74u_shot_2 ??
