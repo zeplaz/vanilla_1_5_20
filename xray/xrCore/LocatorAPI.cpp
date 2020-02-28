@@ -686,7 +686,10 @@ void CLocatorAPI::_initialize	(u32 flags, LPCSTR target_folder, LPCSTR fs_name)
 	if (m_Flags.is(flReady))return;
 	CTimer t;
 	t.Start();
-	Log				("Initializing File System...");
+		Log("###########################################################");
+        Log("X-Ray 1.5.20 - by LVutner. Version 228rc1");
+        Log("Based on Abramcumner's repository with 1.5.10 sources");
+        Log("###########################################################");
 	u32	M1			= Memory.mem_usage();
 
 	m_Flags.set		(flags,TRUE);
