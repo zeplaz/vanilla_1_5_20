@@ -52,6 +52,7 @@ CWeapon::CWeapon()
 
 	m_zoom_params.m_fCurrentZoomFactor			= g_fov;
 	m_zoom_params.m_fZoomRotationFactor			= 0.f;
+	m_zoom_params.m_fSecondVPFovFactor = 0.0f;
 
 	m_pAmmo					= NULL;
 
@@ -350,6 +351,7 @@ void CWeapon::Load		(LPCSTR section)
 	m_crosshair_inertion			= READ_IF_EXISTS(pSettings, r_float, section, "crosshair_inertion",	5.91f);
 	m_first_bullet_controller.load	(section);
 
+	m_zoom_params.m_fSecondVPFovFactor = READ_IF_EXISTS(pSettings, r_float, section, "scope_lens_fov", 0.0f);
 	fireDispersionConditionFactor = pSettings->r_float(section,"fire_dispersion_condition_factor"); 
 	misfireProbability			  = pSettings->r_float(section,"misfire_probability"); 
 	misfireConditionK			  = READ_IF_EXISTS(pSettings, r_float, section, "misfire_condition_k",	1.0f);
@@ -1759,4 +1761,32 @@ bool CWeapon::MovingAnimAllowedNow()
 bool CWeapon::IsHudModeNow()
 {
 	return (HudItemData()!=NULL);
+}
+
+// Iieo?eou FOV io oaeouaai i?o?ey ea?iea aey aoi?iai ?aiaa?a
+float CWeapon::GetSecondVPFov() const
+{
+	if (IsSecondVPZoomPresent())
+        return (m_zoom_params.m_fScopeZoomFactor / 100.f) * g_fov;
+
+	return GetSecondVPZoomFactor() * g_fov;
+}
+
+// Iaiiaeaiea iaiaoiaeiinoe aee??aiey aoi?iai au?ii?oa +SecondVP+
+// Aucuaaaony oieuei aey aeoeaiiai i?o?ey ea?iea
+void CWeapon::UpdateSecondVP()
+{
+	// + CActor::UpdateCL();
+	bool b_is_active_item = (m_pInventory != NULL) && (m_pInventory->ActiveItem() == this);
+	R_ASSERT(
+		ParentIsActor() && b_is_active_item); // Yoa ooieoey aie?ia aucuaaouny oieuei aey i?o?ey a ?oeao iaoaai ea?iea
+
+	CActor* pActor = smart_cast<CActor*>(H_Parent());
+
+	bool bCond_1 = m_zoom_params.m_fZoomRotationFactor > 0.05f; // Iu aie?iu oaeeouny
+	bool bCond_2 = IsSecondVPZoomPresent(); // A eiioeaa aie?ai auou i?iienai oaeoi? coia aey eeicu (scope_lense_factor
+											// aieuoa ?ai 0)
+	bool bCond_3 = pActor->cam_Active() == pActor->cam_FirstEye(); // Iu aie?iu auou io 1-ai eeoa
+
+	Device.m_SecondViewport.SetSVPActive(bCond_1 && bCond_2 && bCond_3);
 }

@@ -345,6 +345,7 @@ void CDetailManager::Render	()
 	MT_SYNC					();
 
 	Statistic.RenderDUMP_DT_Render.Begin	();
+	g_pGamePersistent->m_pGShaderConstants->m_blender_mode.w = 1.0f; //--#SM+#-- Ôëaa ía÷aëa ?aíäa?a o?aâu [begin of grass render]
 
 #ifndef _EDITOR
 	float factor			= g_pGamePersistent->Environment().wind_strength_factor;
@@ -358,6 +359,9 @@ void CDetailManager::Render	()
 	if (UseVS())			hw_Render	();
 	else					soft_Render	();
 	RCache.set_CullMode		(CULL_CCW);
+	
+	g_pGamePersistent->m_pGShaderConstants->m_blender_mode.w = 0.0f; //--#SM+#-- Ôëaa eîíöa ?aíäa?a o?aâu [end of grass render]
+	
 	Statistic.RenderDUMP_DT_Render.End	();
 	m_frame_rendered		= Device.dwFrame;
 }

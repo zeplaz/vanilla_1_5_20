@@ -30,6 +30,7 @@ IGame_Persistent::IGame_Persistent	()
 	Device.seqFrame.Add				(this,REG_PRIORITY_HIGH+1);
 	Device.seqAppActivate.Add		(this);
 	Device.seqAppDeactivate.Add		(this);
+	m_pGShaderConstants = xr_new<ShadersExternalData>(); //--#SM+#--
 
 	m_pMainMenu						= NULL;
 
@@ -55,6 +56,7 @@ IGame_Persistent::~IGame_Persistent	()
 #ifndef _EDITOR
 	xr_delete						(pEnvironment);
 #endif
+	xr_delete(m_pGShaderConstants); //--#SM+#--
 }
 
 void IGame_Persistent::OnAppActivate		()

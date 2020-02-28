@@ -49,6 +49,13 @@ public:
 	virtual void			load				(IReader &input_packet);
 	virtual BOOL			net_SaveRelevant	()								{return inherited::net_SaveRelevant();}
 
+	float CWeapon::GetSecondVPFov() const;
+	IC float GetZRotatingFactor()    const { return m_zoom_params.m_fZoomRotationFactor; }
+	IC float GetSecondVPZoomFactor() const { return m_zoom_params.m_fSecondVPFovFactor; }
+	IC float IsSecondVPZoomPresent() const { return GetSecondVPZoomFactor() > 0.005f; }
+
+	void UpdateSecondVP();
+
 	virtual void			UpdateCL			();
 	virtual void			shedule_Update		(u32 dt);
 
@@ -202,6 +209,7 @@ protected:
 		float			m_fScopeZoomFactor;		//коэффициент увеличения прицела
 
 		float			m_fZoomRotationFactor;
+		float           m_fSecondVPFovFactor;
 		
 		Fvector			m_ZoomDof;
 		Fvector4		m_ReloadDof;

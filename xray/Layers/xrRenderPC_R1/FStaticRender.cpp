@@ -711,3 +711,19 @@ HRESULT	CRender::shader_compile			(
 	return		_result;
 }
 
+
+void CRender::BeforeWorldRender() {}
+
+// Iînëa ?aíäa?a ie?a e iîno-ıôôaeoîâ --#SM+#-- +SecondVP+
+void CRender::AfterWorldRender()
+{
+	if (Device.m_SecondViewport.IsSVPFrame())
+	{
+		// Äaëaao eîie? áıeáóôa?a (oaeóuaaî ıe?aía) â ?aíäa?-oa?aao âoî?îaî âü?iî?oa
+		IRender_Target* T = getTarget();
+		IDirect3DSurface9* pBackBuffer = nullptr;
+		HW.pDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer); // Iîëó÷aai nnuëeó ía áıeáóôa?
+		D3DXLoadSurfaceFromSurface(Target->RT_SecondVP->pRT, 0, 0, pBackBuffer, 0, 0, D3DX_DEFAULT, 0);
+		pBackBuffer->Release(); // Eî??aeoíî î÷euaai nnuëeó ía áıeáóôa? (eía÷a ea?a çaâeníao â îiöeyo)
+	}
+}

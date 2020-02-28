@@ -6,6 +6,9 @@
 static LPCSTR		RTname			= "$user$rendertarget";
 static LPCSTR		RTname_distort	= "$user$distort";
 
+static LPCSTR		RTname_SecondVP = "$user$viewport2"; //--#SM+#-- +SecondVP+
+
+
 CRenderTarget::CRenderTarget()
 {
 	bAvailable			= FALSE;
@@ -23,6 +26,7 @@ CRenderTarget::CRenderTarget()
 	param_noise_scale	= 1.f;
 
 	im_noise_time		= 1/100;
+	RT_SecondVP			= nullptr; //--#SM+# +SecondVP+
 	im_noise_shift_w	= 0;
 	im_noise_shift_h	= 0;
 
@@ -51,6 +55,7 @@ BOOL CRenderTarget::Create	()
 	// Bufferts
 	RT.create			(RTname,			rtWidth,rtHeight,HW.Caps.fTarget);
 	RT_distort.create	(RTname_distort,	rtWidth,rtHeight,HW.Caps.fTarget);
+	RT_SecondVP.create(RTname_SecondVP, Device.dwWidth, Device.dwHeight, HW.Caps.fTarget); //--#SM+#-- +SecondVP+
 	if ((rtHeight!=Device.dwHeight) || (rtWidth!=Device.dwWidth))	{
 		R_CHK		(HW.pDevice->CreateDepthStencilSurface	(rtWidth,rtHeight,HW.Caps.fDepth,D3DMULTISAMPLE_NONE,0,TRUE,&ZB,NULL));
 	} else {
@@ -84,6 +89,7 @@ CRenderTarget::~CRenderTarget	()
 	g_postprocess.destroy		();
 	RT_distort.destroy			();
 	RT.destroy					();
+	RT_SecondVP.destroy			(); //--#SM+#-- +SecondVP+
 }
 
 void	CRenderTarget::calc_tc_noise		(Fvector2& p0, Fvector2& p1)

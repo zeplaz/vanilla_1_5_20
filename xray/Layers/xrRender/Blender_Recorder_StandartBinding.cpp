@@ -305,6 +305,31 @@ static class cl_screen_res : public R_constant_setup
 }	binder_screen_res;
 
 
+// SM_TODO: RCache.hemi çaiaíeoü ía áîëaa "ëîae÷íîa" ianoî
+static class cl_hud_params : public R_constant_setup //--#SM+#--
+{
+	virtual void setup(R_constant* C) 
+	{ 
+		RCache.set_c(C, g_pGamePersistent->m_pGShaderConstants->hud_params); 
+	}
+}	binder_hud_params;
+
+static class cl_script_params : public R_constant_setup //--#SM+#--
+{
+	virtual void setup(R_constant* C)
+	{
+		RCache.set_c(C, g_pGamePersistent->m_pGShaderConstants->m_script_params); 
+	}
+}	binder_script_params;
+
+static class cl_blend_mode : public R_constant_setup //--#SM+#--
+{
+	virtual void setup(R_constant* C) 
+	{
+		RCache.set_c(C, g_pGamePersistent->m_pGShaderConstants->m_blender_mode); 
+	}
+}	binder_blend_mode;
+
 // Standart constant-binding
 void	CBlender_Compile::SetMapping	()
 {
@@ -358,6 +383,13 @@ void	CBlender_Compile::SetMapping	()
 	r_Constant				("L_hemi_color",	&binder_hemi_color);
 	r_Constant				("L_ambient",		&binder_amb_color);
 #endif
+
+	// misc
+	r_Constant				("m_hud_params",	&binder_hud_params);	//--#SM+#--
+	r_Constant				("m_script_params", &binder_script_params); //--#SM+#--
+	r_Constant				("m_blender_mode",	&binder_blend_mode);	//--#SM+#--
+
+
 	r_Constant				("screen_res",		&binder_screen_res);
 
 	// detail

@@ -273,6 +273,9 @@ public:
 	// Main
 	virtual void					Calculate				()											= 0;
 	virtual void					Render					()											= 0;
+
+	virtual void BeforeWorldRender() = 0; //--#SM+#-- Ia?aä ?aíäa?eíaîi ie?a
+	virtual void AfterWorldRender() = 0; //--#SM+#-- Iînëa ?aíäa?eíaa ie?a (äî UI)
 	
 	virtual void					Screenshot				(ScreenshotMode mode=SM_NORMAL, LPCSTR name = 0) = 0;
 	virtual	void					Screenshot				(ScreenshotMode mode, CMemoryWriter& memory_writer) = 0;

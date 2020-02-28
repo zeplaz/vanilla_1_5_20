@@ -342,7 +342,23 @@ void CCameraManager::ApplyDevice (float _viewport_near)
 	// projection
 	Device.fFOV					= m_cam_info.fFov;
 	Device.fASPECT				= m_cam_info.fAspect;
-	Device.mProject.build_projection(deg2rad(m_cam_info.fFov), m_cam_info.fAspect, _viewport_near, m_cam_info.fFar);
+	//Device.mProject.build_projection(deg2rad(m_cam_info.fFov), m_cam_info.fAspect, _viewport_near, m_cam_info.fFar);
+
+	//--#SM+# Begin-- +SecondVP+
+	// Ia?an÷eouâaai FOV äëy âoî?îaî âü?iî?oa [Recalculate scene FOV for SecondVP frame]
+	if (Device.m_SecondViewport.IsSVPFrame())
+	{
+		// Äëy âoî?îaî âü?iî?oa FOV âunoaâëyai çäanü
+		Device.fFOV = g_pGamePersistent->m_pGShaderConstants->hud_params.y;
+
+		// I?aäói?aaäaai ÷oî iu eçiaíeëe íano?îéee eaia?u
+		Device.m_SecondViewport.isCamReady = true;
+	}
+	else
+		Device.m_SecondViewport.isCamReady = false;
+
+	Device.mProject.build_projection(deg2rad(Device.fFOV), m_cam_info.fAspect, _viewport_near, m_cam_info.fFar);
+	//--#SM+# End--
 
 	if( g_pGamePersistent && g_pGamePersistent->m_pMainMenu->IsActive() )
 		ResetPP					();

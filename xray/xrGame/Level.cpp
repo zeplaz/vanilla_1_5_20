@@ -775,6 +775,8 @@ extern void draw_wnds_rects();
 
 void CLevel::OnRender()
 {
+	::Render->BeforeWorldRender();	//--#SM+#-- +SecondVP+	
+		
 	inherited::OnRender	();
 
 	if (!game)
@@ -786,6 +788,9 @@ void CLevel::OnRender()
 	BulletManager().Render();
 	//Statistic.TEST1.End();
 	//отрисовать интерфейc пользователя
+	
+	::Render->AfterWorldRender(); //--#SM+#-- +SecondVP+
+		
 	HUD().RenderUI();
 
 #ifdef DEBUG
