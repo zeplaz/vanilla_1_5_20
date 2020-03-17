@@ -10,7 +10,7 @@
 #include "../xrEngine/CameraBase.h"
 #include "player_hud.h"
 #include "../xrEngine/SkeletonMotions.h"
-
+#include "ui_base.h"
 CHudItem::CHudItem()
 {
 	RenderHud					(TRUE);
